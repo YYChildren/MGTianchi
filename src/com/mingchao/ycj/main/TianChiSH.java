@@ -38,12 +38,10 @@ public class TianChiSH {
 		
 	}
 	public static void main(String[] args) {
-	    System.out.println(System.getProperty("user.dir"));  /////////
-		System.loadLibrary("E:/Children/jeclipse_workspace/tianchi/clib/segmentor_jni.dll");
-		String transFileIn = "G:\tianchi/weibo_train_data.tsv";
-		String predFileIn = "G:\tianchi/weibo_predict_data.tsv";
-		String transFileOut = "G:\tianchi/weibo_train_data_out.tsv";
-		String predFileOut = "G:\tianchi/weibo_predict_out.tsv";
+		String transFileIn = "G:/tianchi/weibo_train_data.tsv";
+		String predFileIn = "G:/tianchi/weibo_predict_data.tsv";
+		String transFileOut = "G:/tianchi/weibo_train_data_out.tsv";
+		String predFileOut = "G:/tianchi/weibo_predict_out.tsv";
 		String cwsModel = "E:/Children/data/3.2.0/ltp_data/cws.model";
 		String posModel = "E:/Children/data/3.2.0/ltp_data/pos.model";
 		String nerModel = "E:/Children/data/3.2.0/ltp_data/ner.model";
