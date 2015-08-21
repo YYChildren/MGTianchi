@@ -2,7 +2,6 @@ package com.mingchao.ycj.main;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -14,11 +13,12 @@ import com.mingchao.ycj.util.SentenceHandler;
 
 public class TianChiSH {
 
-	private static void startSh(BufferedReader br,PrintWriter pw,SHFactory shf) throws Exception{
+	private static void startSh(BufferedReader br, PrintWriter pw, SHFactory shf)
+			throws Exception {
 		String line;
-		while( (line= br.readLine()) != null  ){
+		while ((line = br.readLine()) != null) {
 			line = line.trim();
-			if(line.equals("")){
+			if (line.equals("")) {
 				continue;
 			}
 			String[] a = line.split("\t");
@@ -32,15 +32,15 @@ public class TianChiSH {
 			pw.print(sh.getTags());
 			pw.print('\t');
 			pw.print(sh.getNers());
-			pw.println();
-			
+			pw.print('\n');
+
 		}
-		
+
 	}
 	public static void main(String[] args) {
 		String transFileIn = "G:/tianchi/weibo_train_data.tsv";
 		String predFileIn = "G:/tianchi/weibo_predict_data.tsv";
-		String transFileOut = "G:/tianchi/weibo_train_data_out.tsv";
+		String transFileOut = "G:/tianchi/weibo_train_out.tsv";
 		String predFileOut = "G:/tianchi/weibo_predict_out.tsv";
 		String cwsModel = "E:/Children/data/3.2.0/ltp_data/cws.model";
 		String posModel = "E:/Children/data/3.2.0/ltp_data/pos.model";
