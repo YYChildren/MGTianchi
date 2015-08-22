@@ -9,7 +9,7 @@ public class DB {
     private LinkedBlockingQueue<Connection> pool;
  	private static final String IMPALAD_HOST = "192.168.8.208";
  	private static final String IMPALAD_JDBC_PORT = "21050";
- 	private static final String CONNECTION_URL = "jdbc:hive://" 
+ 	private static final String CONNECTION_URL = "jdbc:hive2://" 
  			+ IMPALAD_HOST 
  			+ ':' 
  			+ IMPALAD_JDBC_PORT 

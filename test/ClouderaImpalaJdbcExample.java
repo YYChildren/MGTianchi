@@ -6,7 +6,7 @@ import java.sql.Statement;
 import com.mingchao.ycj.util.DB;
  
 public class ClouderaImpalaJdbcExample {
-	private static String SQL_STATEMENT = "SELECT * FROM t_weibo_pred LIMIT 1";
+	private static String SQL_STATEMENT = "SELECT * FROM test";
 //	private static String SQL_STATEMENT = "SHOW TABLES";
 	
 	public static void main(String[] args) {
