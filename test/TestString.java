@@ -21,6 +21,11 @@ public class TestString {
 		System.out.println(Math.log(111111*1.0/822868));
 		
 		System.out.println(111+0.0);
+		
+		System.out.println(Math.log(Double.MIN_VALUE));
+		System.out.println(Math.log(1/Double.MAX_VALUE));
+		
+		System.out.println(Math.log(0.00001));
 	}
 	@Test
 	public void testDouble(){

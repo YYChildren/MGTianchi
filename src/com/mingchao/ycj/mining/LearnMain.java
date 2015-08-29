@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -268,14 +269,17 @@ public class LearnMain {
 					break;
 				}
 				//更新数据，迭代分类
-//				
-//				for(Integer key : mClsCount.keySet()){
-//					if(key <= maxClass){
-//						mClsMUidCount.remove(key);
-//						mClsMWordCount.remove(key);
-//						mClsCount.remove(key);
-//					}
-//				}
+				
+				Iterator<Map.Entry<Integer,Integer>> it = mClsCount.entrySet().iterator();
+				while(it.hasNext()){
+					Map.Entry<Integer,Integer> e = it.next();
+					Integer key = e.getKey();
+					if(key <= maxClass){
+						mClsMUidCount.remove(key);
+						mClsMWordCount.remove(key);
+						it.remove();
+					}
+				}
 				inputPath = otherOutputPath;
 				Connection conn = null;
 				Statement stmt = null;
@@ -412,5 +416,9 @@ public class LearnMain {
 			RawIO.closeReader(br);
 		}
 		return hasNext; 
+	}
+
+	public void combine(){
+		
 	}
 }

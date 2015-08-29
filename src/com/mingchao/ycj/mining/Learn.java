@@ -3,11 +3,12 @@ package com.mingchao.ycj.mining;
 import java.util.HashMap;
 
 public class Learn {
-	private HashMap<Integer,HashMap<String,Integer>> mClsMUidCount;
-	private HashMap<Integer,HashMap<String,Integer>> mClsMWordCount;
-	private HashMap<Integer,Integer> mClsCount;
+	private HashMap<Integer, HashMap<String, Integer>> mClsMUidCount;
+	private HashMap<Integer, HashMap<String, Integer>> mClsMWordCount;
+	private HashMap<Integer, Integer> mClsCount;
 	private int nRecords;
-	
+	private int nClasses;
+
 	public Learn() {
 		super();
 	}
@@ -20,61 +21,71 @@ public class Learn {
 		this.mClsMWordCount = mClsMWordCount;
 		this.mClsCount = mClsCount;
 		this.nRecords = nRecords;
+		nClasses =  mClsCount.size();
 	}
 
-	public int pred(String uid, String [] wordArray){
+	public int pred(String uid, String[] wordArray) {
 		double target = -Double.MAX_VALUE;
 		int targetCls = 0;
-		for(Integer cls : mClsCount.keySet()){
-			double t = cweight(cls,uid,wordArray);
-			if(t > target){
+		for (Integer cls : mClsCount.keySet()) {
+			double t = cweight(cls, uid, wordArray);
+			if (t > target) {
 				target = t;
-				targetCls = cls; 
+				targetCls = cls;
 			}
 		}
-		System.out.print("Target Class: "+ targetCls +"\n");
+		System.out.print("Target Class: " + targetCls + "\n");
 		return targetCls;
 	}
 
-	private  double cweight(Integer cls,String uid, String [] wordList){
-//		System.out.print("Class: "+cls+"\t");
+	private double cweight(Integer cls, String uid, String[] wordList) {
+		// System.out.print("Class: "+cls+"\t");
 		double weight = 0.0;
 		int clsCount = get(mClsCount, cls);
-		double classWeight = Math.log((double)clsCount/nRecords);
+		double classWeight = Math.log((double)clsCount / (double)nRecords);
 		weight += classWeight;
-//		System.out.print("weight: "+weight+"\t");
-		int uidCount = get(mClsMUidCount, cls,uid);
-		double uidWeight =  Math.log((uidCount+1.0)/(clsCount+clsCount));
+		// System.out.print("weight: "+weight+"\t");
+		int uidCount = get(mClsMUidCount, cls, uid);
+		double uidWeight = countWeight(uidCount,clsCount);;
 		weight += uidWeight;
-//		System.out.print(weight+"\t");
+		// System.out.print(weight+"\t");
 		double wordWeight = 0.0;
-		for(String word:wordList){
+		for (String word : wordList) {
 			int wordCount = get(mClsMWordCount, cls, word);
-			wordWeight += Math.log((wordCount+1.0)/(clsCount+clsCount));
+			wordWeight += countWeight(wordCount, clsCount);
 		}
-		wordWeight /= wordList.length;
+		wordWeight = wordWeight / wordList.length;
 		weight += wordWeight;
-//		System.out.print(weight+"\t");
-//		System.out.println("classWeight: "+ classWeight + "\t" + "uidWeight: " + uidWeight+"\t" + "wordWeight: " + wordWeight);
+		// System.out.print(weight+"\t");
+		// System.out.println("classWeight: "+ classWeight + "\t" +
+		// "uidWeight: " + uidWeight+"\t" + "wordWeight: " + wordWeight);
 		return weight;
 	}
-	
-	private int get(HashMap<Integer,Integer> m,Integer key){
+	private double countWeight(double member,double denominator){
+		return Math.log((member + 1.0) / (denominator + (double)nClasses / nRecords));
+	}
+
+	private int get(HashMap<Integer, Integer> m, Integer key) {
 		return m.getOrDefault(key, 0);
 	}
-	private int get(HashMap<Integer,HashMap<String,Integer>> m,Integer key1,String key2){
+
+	private int get(HashMap<Integer, HashMap<String, Integer>> m, Integer key1,
+			String key2) {
 		HashMap<String, Integer> m2 = m.get(key1);
-		if(m2 != null){
+		if (m2 != null) {
 			return (int) m2.getOrDefault(key2, 0);
-		}else{
+		} else {
 			return 0;
 		}
 	}
-	public void setmClsMUidCount(HashMap<Integer, HashMap<String, Integer>> mClsMUidCount) {
+
+	public void setmClsMUidCount(
+			HashMap<Integer, HashMap<String, Integer>> mClsMUidCount) {
 		this.mClsMUidCount = mClsMUidCount;
 	}
 
-	public void setmClsMWordCount(HashMap<Integer, HashMap<String, Integer>> mClsMWordCount) {
+	public void setmClsMWordCount(
+			HashMap<Integer, HashMap<String, Integer>> mClsMWordCount) {
 		this.mClsMWordCount = mClsMWordCount;
 	}
 

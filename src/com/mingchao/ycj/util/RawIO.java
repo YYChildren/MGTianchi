@@ -15,17 +15,23 @@ import java.io.UnsupportedEncodingException;
 public class RawIO {
 	public static final String FILE_ENCODE = "UTF-8";
 
-	public static BufferedReader openReader(String path) throws FileNotFoundException {
+	public static BufferedReader openReader(String path)
+			throws FileNotFoundException {
+		return openReader(new File(path));
+	}
+
+	public static BufferedReader openReader(File f)
+			throws FileNotFoundException {
 		try {
-			return new BufferedReader(new InputStreamReader(new FileInputStream(
-					new File(path)), FILE_ENCODE));
+			return new BufferedReader(new InputStreamReader(
+					new FileInputStream(f), FILE_ENCODE));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
 
-	public static void closeReader(BufferedReader br){
+	public static void closeReader(BufferedReader br) {
 		if (br != null)
 			try {
 				br.close();
@@ -34,14 +40,19 @@ public class RawIO {
 			}
 	}
 
-	public static PrintWriter openWriter(String path) throws FileNotFoundException{
+	public static PrintWriter openWriter(String path)
+			throws FileNotFoundException {
+		return openWriter(new File(path));
+	}
+
+	public static PrintWriter openWriter(File f) throws FileNotFoundException {
 		try {
-			return new PrintWriter(new BufferedWriter(
-					new OutputStreamWriter(new FileOutputStream(new File(path)),FILE_ENCODE)));
+			return new PrintWriter(new BufferedWriter(new OutputStreamWriter(
+					new FileOutputStream(f), FILE_ENCODE)));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return null;
-		} 
+		}
 	}
 
 	public static void closeWriter(PrintWriter pw) {
