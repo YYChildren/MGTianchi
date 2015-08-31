@@ -1,3 +1,7 @@
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.junit.Test;
 
 
@@ -25,11 +29,17 @@ public class TestString {
 		System.out.println(Math.log(Double.MIN_VALUE));
 		System.out.println(Math.log(1/Double.MAX_VALUE));
 		
-		System.out.println(Math.log(0.00001));
+		System.out.println(Math.log(0.000001));
 	}
 	@Test
 	public void testDouble(){
 		System.out.println(-106.279491904863 > (-Double.MAX_VALUE  ));
 		System.out.println(-106.279491904863 > -132.12341896311406);
+	}
+	@Test
+	public void testDate(){
+		Date date = new Date(); 
+		DateFormat df6 = new SimpleDateFormat("yyyyMMddhhmmss");
+		System.out.print(df6.format(date));
 	}
 }

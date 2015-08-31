@@ -1,8 +1,6 @@
 package com.mingchao.ycj.util;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -10,29 +8,42 @@ import java.util.Collections;
 import java.util.List;
 
 public class FileCombine {
-	public static void  combine(String dir,String regex,String fileoutput) throws IOException{
-		List<String> a = new ArrayList<String>();
-		FilenameFilter filter = new FilenameFilter(){
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.matches(regex);
+	public static void combine(List<String> pathList, String fileoutput)
+			throws IOException {
+		ArrayList<String> a = new ArrayList<String>();
+		for (String path : pathList) {
+			BufferedReader br = RawIO.openReader(path);
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				a.add(line);
 			}
-			
-		};
-		File d = new File("dir");
-		if(d.isDirectory()){
-			for(File f : d.listFiles(filter)){
-				BufferedReader br = RawIO.openReader(f);
-				String line=null;
-				while((line = br.readLine())!=null){
-					a.add(line);
-				}
-				br.close();
-			}
+			RawIO.closeReader(br);
 		}
 		Collections.sort(a);
 		PrintWriter pw = RawIO.openWriter(fileoutput);
-		a.forEach(line -> pw.print(line+"\n"));
+		a.forEach(line -> pw.print(line + "\n"));
+		RawIO.closeWriter(pw);
 	}
-	
+
+	public static void combine2(String forwardSrc, String commentSrc,
+			String likeSrc, String allOut) throws IOException {
+		BufferedReader fi = RawIO.openReader(forwardSrc);
+		BufferedReader ci = RawIO.openReader(commentSrc);
+		BufferedReader li = RawIO.openReader(likeSrc);
+		PrintWriter pw = RawIO.openWriter(allOut);
+		String frecord = null;
+		String crecord = null;
+		String lrecord = null;
+		while ((frecord = fi.readLine()) != null) {
+			crecord = ci.readLine();
+			lrecord = li.readLine();
+			pw.print(frecord + "," + crecord.split("\t")[2] + ","
+					+ lrecord.split("\t")[2] + "\n");
+		}
+		pw.flush();
+		RawIO.closeWriter(pw);
+		RawIO.closeReader(li);
+		RawIO.closeReader(ci);
+		RawIO.closeReader(fi);
+	}
 }

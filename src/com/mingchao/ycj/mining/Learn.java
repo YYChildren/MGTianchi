@@ -7,7 +7,7 @@ public class Learn {
 	private HashMap<Integer, HashMap<String, Integer>> mClsMWordCount;
 	private HashMap<Integer, Integer> mClsCount;
 	private int nRecords;
-	private int nClasses;
+	//private int nClasses;
 
 	public Learn() {
 		super();
@@ -21,7 +21,7 @@ public class Learn {
 		this.mClsMWordCount = mClsMWordCount;
 		this.mClsCount = mClsCount;
 		this.nRecords = nRecords;
-		nClasses =  mClsCount.size();
+		//nClasses =  mClsCount.size();
 	}
 
 	public int pred(String uid, String[] wordArray) {
@@ -62,7 +62,8 @@ public class Learn {
 		return weight;
 	}
 	private double countWeight(double member,double denominator){
-		return Math.log((member + 1.0) / (denominator + (double)nClasses / nRecords));
+		//return Math.log((member + 1.0) / (denominator + (double)nRecords / nClasses));
+		return Math.log((member + 0.000001) / (denominator+0.1));
 	}
 
 	private int get(HashMap<Integer, Integer> m, Integer key) {

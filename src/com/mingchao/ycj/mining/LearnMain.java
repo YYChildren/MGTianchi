@@ -8,30 +8,54 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.mingchao.ycj.util.DB;
+import com.mingchao.ycj.util.FileCombine;
 import com.mingchao.ycj.util.RawIO;
 
 public class LearnMain {
 
 	public static void main(String[] args) {
-		LearnMain.initPredSrc("db_pred.t_weibo_pred_stn");
+		//LearnMain.initPredSrc("db_pred.t_weibo_pred_stn");
 		LearnMain lm = new LearnMain();
 		int[] splClass = {0,1,22,208,1102,2292,73450};
-		lm.pred("forward", splClass);
+		List<String> fPathList = lm.pred("forward", splClass);
 		int[] splClass2 = {0,1,9,37,305,1326,29516};
-		lm.pred("comment", splClass2);
+		List<String> cPathList = lm.pred("comment", splClass2);
 		int[] splClass3 = {0,1,9,81,1326,2294,6861};
-		lm.pred("like", splClass3);
+		List<String> lPathList = lm.pred("like", splClass3);
+		lm = null;
+		System.gc();
+		try {
+			String foutput = LearnMain.basePath+"/forward.out";
+			FileCombine.combine(fPathList, foutput);
+			System.gc();
+			String coutput = LearnMain.basePath+"/comment.out";
+			FileCombine.combine(cPathList, coutput);
+			System.gc();
+			String loutput = LearnMain.basePath+"/like.out";
+			FileCombine.combine(lPathList, loutput);
+			System.gc();
+			Date date = new Date(); 
+			DateFormat df = new SimpleDateFormat("yyyyMMddhhmmss"); 
+			String allOut = LearnMain.basePath+"/" + df.format(date)+ ".txt";
+			FileCombine.combine2(foutput, coutput, loutput, allOut);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
-	
 
-	private final static String basePath = "E:/WeiboPred/learn";
+	public final static String basePath = "E:/WeiboPred/learn";
 	private final static String predSrcPath = basePath + "/pred_src.tsv";
 	private Set<String> zeroUid;
 	private Set<String> zero1Uid;
@@ -39,6 +63,7 @@ public class LearnMain {
 	private HashMap<Integer, HashMap<String, Integer>> mClsMWordCount;
 	private HashMap<Integer, Integer> mClsCount;
 	private int nRecords = 0;
+	private List<String> outputPathList;
 	
 	private LearnMain() {
 	}
@@ -128,6 +153,7 @@ public class LearnMain {
 		mClsMUidCount = new HashMap<>();
 		mClsMWordCount = new HashMap<>();
 		mClsCount = new HashMap<>();
+		outputPathList = new ArrayList<String>();
 		
 		DB db = DB.getInstance();
 		Connection conn = null;
@@ -211,13 +237,14 @@ public class LearnMain {
 		System.out.println("Object inited");
 	}
 	
-	public void pred(String type, int[] splClass){
+	public List<String> pred(String type, int[] splClass){
 		init2(type);	
 		pred2(type,splClass);
+		return outputPathList;
 	}
 	
 	private void pred2(String type, int[] splClass){
-		classfy(type,splClass);
+		classify(type,splClass);
 	}
 	
 	private void filter(String inputPath,String outputPath,String otherOutputPath,Set<String> filterSet,int targetClass) {
@@ -248,7 +275,7 @@ public class LearnMain {
 		}
 	}
 
-	private void classfy(String type, int[] splClass) {
+	private void classify(String type, int[] splClass) {
 		DB db = DB.getInstance();
 		String inputPath = predSrcPath;
 		String outputPath;
@@ -256,6 +283,7 @@ public class LearnMain {
 		for (int maxClass : splClass) {
 			outputPath = basePath + "/" + type + "_" + maxClass + ".tsv";
 			otherOutputPath = basePath + "/" + type + "_o_" + maxClass + ".tsv";
+			outputPathList.add(outputPath);
 			if(maxClass == 0){
 				filter(inputPath,outputPath,otherOutputPath,zeroUid,0);
 				inputPath = otherOutputPath;
