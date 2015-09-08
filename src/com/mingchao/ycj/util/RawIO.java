@@ -31,15 +31,6 @@ public class RawIO {
 		}
 	}
 
-	public static void closeReader(BufferedReader br) {
-		if (br != null)
-			try {
-				br.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-	}
-
 	public static PrintWriter openWriter(String path)
 			throws FileNotFoundException {
 		return openWriter(new File(path));
@@ -55,8 +46,19 @@ public class RawIO {
 		}
 	}
 
-	public static void closeWriter(PrintWriter pw) {
+
+	public static void close(BufferedReader br) {
+		if (br != null)
+			try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	}
+	
+	public static void close(PrintWriter pw) {
 		if (pw != null)
 			pw.close();
 	}
+	
 }

@@ -17,12 +17,12 @@ public class FileCombine {
 			while ((line = br.readLine()) != null) {
 				a.add(line);
 			}
-			RawIO.closeReader(br);
+			RawIO.close(br);
 		}
 		Collections.sort(a);
 		PrintWriter pw = RawIO.openWriter(fileoutput);
 		a.forEach(line -> pw.print(line + "\n"));
-		RawIO.closeWriter(pw);
+		RawIO.close(pw);
 	}
 
 	public static void combine2(String forwardSrc, String commentSrc,
@@ -41,9 +41,9 @@ public class FileCombine {
 					+ lrecord.split("\t")[2] + "\n");
 		}
 		pw.flush();
-		RawIO.closeWriter(pw);
-		RawIO.closeReader(li);
-		RawIO.closeReader(ci);
-		RawIO.closeReader(fi);
+		RawIO.close(pw);
+		RawIO.close(li);
+		RawIO.close(ci);
+		RawIO.close(fi);
 	}
 }

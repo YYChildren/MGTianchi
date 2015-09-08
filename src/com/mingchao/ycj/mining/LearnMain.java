@@ -26,29 +26,29 @@ import com.mingchao.ycj.util.RawIO;
 public class LearnMain {
 
 	public static void main(String[] args) {
-		//LearnMain.initPredSrc("db_pred.t_weibo_pred_stn");
+		// LearnMain.initPredSrc("db_pred.t_weibo_pred_stn");
 		LearnMain lm = new LearnMain();
-		int[] splClass = {0,1,22,208,1102,2292,73450};
+		int[] splClass = { 0, 1, 22, 208, 1102, 2292, 73450 };
 		List<String> fPathList = lm.pred("forward", splClass);
-		int[] splClass2 = {0,1,9,37,305,1326,29516};
+		int[] splClass2 = { 0, 1, 9, 37, 305, 1326, 29516 };
 		List<String> cPathList = lm.pred("comment", splClass2);
-		int[] splClass3 = {0,1,9,81,1326,2294,6861};
+		int[] splClass3 = { 0, 1, 9, 81, 1326, 2294, 6861 };
 		List<String> lPathList = lm.pred("like", splClass3);
 		lm = null;
 		System.gc();
 		try {
-			String foutput = LearnMain.basePath+"/forward.out";
+			String foutput = LearnMain.basePath + "/forward.out";
 			FileCombine.combine(fPathList, foutput);
 			System.gc();
-			String coutput = LearnMain.basePath+"/comment.out";
+			String coutput = LearnMain.basePath + "/comment.out";
 			FileCombine.combine(cPathList, coutput);
 			System.gc();
-			String loutput = LearnMain.basePath+"/like.out";
+			String loutput = LearnMain.basePath + "/like.out";
 			FileCombine.combine(lPathList, loutput);
 			System.gc();
-			Date date = new Date(); 
-			DateFormat df = new SimpleDateFormat("yyyyMMddhhmmss"); 
-			String allOut = LearnMain.basePath+"/" + df.format(date)+ ".txt";
+			Date date = new Date();
+			DateFormat df = new SimpleDateFormat("yyyyMMddhhmmss");
+			String allOut = LearnMain.basePath + "/" + df.format(date) + ".txt";
 			FileCombine.combine2(foutput, coutput, loutput, allOut);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -59,12 +59,12 @@ public class LearnMain {
 	private final static String predSrcPath = basePath + "/pred_src.tsv";
 	private Set<String> zeroUid;
 	private Set<String> zero1Uid;
-	private HashMap<Integer, HashMap<String, Integer>> mClsMUidCount;
-	private HashMap<Integer, HashMap<String, Integer>> mClsMWordCount;
-	private HashMap<Integer, Integer> mClsCount;
+	private HashMap<Integer, HashMap<String, Double>> mClsMUidCount;
+	private HashMap<Integer, HashMap<String, Double>> mClsMWordCount;
+	private HashMap<Integer, Double> mClsCount;
 	private int nRecords = 0;
 	private List<String> outputPathList;
-	
+
 	private LearnMain() {
 	}
 
@@ -110,7 +110,7 @@ public class LearnMain {
 		} catch (SQLException | InterruptedException | FileNotFoundException e) {
 			e.printStackTrace();
 		} finally {
-			RawIO.closeWriter(pw);
+			RawIO.close(pw);
 			try {
 				rs.close();
 			} catch (SQLException e1) {
@@ -154,7 +154,7 @@ public class LearnMain {
 		mClsMWordCount = new HashMap<>();
 		mClsCount = new HashMap<>();
 		outputPathList = new ArrayList<String>();
-		
+
 		DB db = DB.getInstance();
 		Connection conn = null;
 		Statement stmt = null;
@@ -176,38 +176,41 @@ public class LearnMain {
 				zero1Uid.add(rs.getString(1));
 			}
 
-			sql = "SELECT "+type+"_class,uid,count FROM db_pred_ycj.t_weibo_train_" + type
+			sql = "SELECT " + type
+					+ "_class,uid,count FROM db_pred_ycj.t_weibo_train_" + type
 					+ "_class_uid_count";
 			rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				int targetClass = rs.getInt(1);
 				String uid = rs.getString(2);
-				int count = rs.getInt(3);
-				HashMap<String, Integer> m = mClsMUidCount.getOrDefault(
-						targetClass, new HashMap<String, Integer>());
+				Double count = rs.getDouble(3);
+				HashMap<String, Double> m = mClsMUidCount.getOrDefault(
+						targetClass, new HashMap<String, Double>());
 				m.put(uid, count);
 				mClsMUidCount.put(targetClass, m);
 			}
 
-			sql = "SELECT "+type+"_class,word,count FROM db_pred_ycj.t_weibo_train_" + type
-					+ "_class_word_count";
+			sql = "SELECT " + type
+					+ "_class,word,count FROM db_pred_ycj.t_weibo_train_"
+					+ type + "_class_word_count";
 			rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				int targetClass = rs.getInt(1);
 				String word = rs.getString(2);
-				int count = rs.getInt(3);
-				HashMap<String, Integer> m = mClsMWordCount.getOrDefault(
-						targetClass, new HashMap<String, Integer>());
+				Double count = rs.getDouble(3);
+				HashMap<String, Double> m = mClsMWordCount.getOrDefault(
+						targetClass, new HashMap<String, Double>());
 				m.put(word, count);
 				mClsMWordCount.put(targetClass, m);
 			}
 
-			sql = "SELECT "+type+"_class,count FROM db_pred_ycj.t_weibo_train_" + type
+			sql = "SELECT " + type
+					+ "_class,count FROM db_pred_ycj.t_weibo_train_" + type
 					+ "_class_count";
 			rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				int targetClass = rs.getInt(1);
-				int count = rs.getInt(2);
+				Double count = rs.getDouble(2);
 				mClsCount.put(targetClass, count);
 			}
 
@@ -236,42 +239,43 @@ public class LearnMain {
 		}
 		System.out.println("Object inited");
 	}
-	
-	public List<String> pred(String type, int[] splClass){
-		init2(type);	
-		pred2(type,splClass);
+
+	public List<String> pred(String type, int[] splClass) {
+		init2(type);
+		pred2(type, splClass);
 		return outputPathList;
 	}
-	
-	private void pred2(String type, int[] splClass){
-		classify(type,splClass);
+
+	private void pred2(String type, int[] splClass) {
+		classify(type, splClass);
 	}
-	
-	private void filter(String inputPath,String outputPath,String otherOutputPath,Set<String> filterSet,int targetClass) {
+
+	private void filter(String inputPath, String outputPath,
+			String otherOutputPath, Set<String> filterSet, int targetClass) {
 		BufferedReader br = null;
 		PrintWriter pw = null;
 		PrintWriter pwo = null;
 		try {
-			 br = RawIO.openReader(inputPath);
-			 pw = RawIO.openWriter(outputPath);
-			 pwo = RawIO.openWriter(otherOutputPath);
-			 String line = null;
-			while((line = br.readLine()) != null){
+			br = RawIO.openReader(inputPath);
+			pw = RawIO.openWriter(outputPath);
+			pwo = RawIO.openWriter(otherOutputPath);
+			String line = null;
+			while ((line = br.readLine()) != null) {
 				String[] uidMidWordL = line.split("\t");
 				String uid = uidMidWordL[0];
 				String mid = uidMidWordL[1];
 				if (!filterSet.contains(uid)) {
 					pwo.print(line + "\n");
 				} else {
-					pw.print(uid+"\t"+ mid + "\t" + targetClass + "\n");
+					pw.print(uid + "\t" + mid + "\t" + targetClass + "\n");
 				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			RawIO.closeWriter(pwo);
-			RawIO.closeWriter(pw);
-			RawIO.closeReader(br);
+			RawIO.close(pwo);
+			RawIO.close(pw);
+			RawIO.close(br);
 		}
 	}
 
@@ -284,55 +288,50 @@ public class LearnMain {
 			outputPath = basePath + "/" + type + "_" + maxClass + ".tsv";
 			otherOutputPath = basePath + "/" + type + "_o_" + maxClass + ".tsv";
 			outputPathList.add(outputPath);
-			if(maxClass == 0){
-				filter(inputPath,outputPath,otherOutputPath,zeroUid,0);
-				inputPath = otherOutputPath;
-			}else if(maxClass == 1){
-				filter(inputPath,outputPath,otherOutputPath,zero1Uid,0);
-				inputPath = otherOutputPath;
-			}else{
-				int lnRecords = nRecords;
-				boolean hasNext = learn(inputPath, outputPath, otherOutputPath, maxClass, lnRecords);
-				if(!hasNext){
-					break;
+			int lnRecords = nRecords;
+			boolean hasNext = learn(inputPath, outputPath, otherOutputPath,
+					maxClass, lnRecords);
+			if (!hasNext) {
+				break;
+			}
+			// 更新数据，迭代分类
+
+			Iterator<Map.Entry<Integer, Double>> it = mClsCount.entrySet()
+					.iterator();
+			while (it.hasNext()) {
+				Map.Entry<Integer, Double> e = it.next();
+				Integer key = e.getKey();
+				if (key <= maxClass) {
+					mClsMUidCount.remove(key);
+					mClsMWordCount.remove(key);
+					it.remove();
 				}
-				//更新数据，迭代分类
-				
-				Iterator<Map.Entry<Integer,Integer>> it = mClsCount.entrySet().iterator();
-				while(it.hasNext()){
-					Map.Entry<Integer,Integer> e = it.next();
-					Integer key = e.getKey();
-					if(key <= maxClass){
-						mClsMUidCount.remove(key);
-						mClsMWordCount.remove(key);
-						it.remove();
-					}
-				}
-				inputPath = otherOutputPath;
-				Connection conn = null;
-				Statement stmt = null;
-				ResultSet rs = null;
+			}
+			inputPath = otherOutputPath;
+			Connection conn = null;
+			Statement stmt = null;
+			ResultSet rs = null;
+			try {
+				String sql = "SELECT count(*) FROM db_pred.t_weibo_train_stn_class WHERE "
+						+ type + "_class > " + maxClass;
+				conn = db.getConnection();
+				stmt = conn.createStatement();
+				rs = stmt.executeQuery(sql);
+				rs.next();
+				lnRecords = rs.getInt(1);
+			} catch (InterruptedException | SQLException e) {
+				e.printStackTrace();
+				break;
+			} finally {
 				try {
-					String sql = "SELECT count(*) FROM db_pred.t_weibo_train_stn_class WHERE "+type + "_class > " + maxClass;
-					conn = db.getConnection();
-					stmt = conn.createStatement();
-					rs = stmt.executeQuery(sql);
-					rs.next();
-					lnRecords = rs.getInt(1);
-				} catch (InterruptedException | SQLException e) {
+					stmt.close();
+				} catch (SQLException e) {
 					e.printStackTrace();
-					break;
-				} finally {
-					try {
-						stmt.close();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-					try {
-						db.release(conn);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+				}
+				try {
+					db.release(conn);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
 		}
@@ -343,70 +342,76 @@ public class LearnMain {
 
 		int lmaxClass = Integer.MIN_VALUE;
 
-		HashMap<Integer, HashMap<String, Integer>> lmClsMUidCount = new HashMap<>();
-		HashMap<Integer, HashMap<String, Integer>> lmClsMWordCount = new HashMap<>();
-		HashMap<Integer, Integer> lmClsCount = new HashMap<>();
+		HashMap<Integer, HashMap<String, Double>> lmClsMUidCount = new HashMap<>();
+		HashMap<Integer, HashMap<String, Double>> lmClsMWordCount = new HashMap<>();
+		HashMap<Integer, Double> lmClsCount = new HashMap<>();
 
 		// 合并小类uid
-		for (HashMap.Entry<Integer, HashMap<String, Integer>> clsUidCount : mClsMUidCount
+		for (HashMap.Entry<Integer, HashMap<String, Double>> clsUidCount : mClsMUidCount
 				.entrySet()) {
 			Integer cls = clsUidCount.getKey();
-			if(cls > maxClass){
-				HashMap<String, Integer> newMUidCount = clsUidCount.getValue();
-				HashMap<String, Integer> mUidCount = lmClsMUidCount.getOrDefault(lmaxClass, new HashMap<>());
-				for(Map.Entry<String, Integer> uidCount : mUidCount.entrySet()){
+			if (cls > maxClass) {
+				HashMap<String, Double> newMUidCount = clsUidCount.getValue();
+				HashMap<String, Double> mUidCount = lmClsMUidCount
+						.getOrDefault(lmaxClass, new HashMap<>());
+				for (Map.Entry<String, Double> uidCount : mUidCount.entrySet()) {
 					String uid = uidCount.getKey();
-					Integer count = uidCount.getValue();
-					if(newMUidCount.containsKey(uid)){
+					Double count = uidCount.getValue();
+					if (newMUidCount.containsKey(uid)) {
 						mUidCount.put(uid, count + newMUidCount.get(uid));
 					}
 				}
-				for(Map.Entry<String, Integer> uidCount : newMUidCount.entrySet()){
+				for (Map.Entry<String, Double> uidCount : newMUidCount
+						.entrySet()) {
 					String uid = uidCount.getKey();
-					Integer count = uidCount.getValue();
-					if(!mUidCount.containsKey(uid)){
+					Double count = uidCount.getValue();
+					if (!mUidCount.containsKey(uid)) {
 						mUidCount.put(uid, count);
 					}
 				}
 				lmClsMUidCount.put(lmaxClass, mUidCount);
-			}else{
+			} else {
 				lmClsMUidCount.put(cls, clsUidCount.getValue());
 			}
 		}
 
 		// 合并小类word
-		for (HashMap.Entry<Integer, HashMap<String, Integer>> clsWordCount : mClsMWordCount
+		for (HashMap.Entry<Integer, HashMap<String, Double>> clsWordCount : mClsMWordCount
 				.entrySet()) {
 			Integer cls = clsWordCount.getKey();
-			if(cls > maxClass){
-				HashMap<String, Integer> newMWordCount = clsWordCount.getValue();
-				HashMap<String, Integer> mWordCount = lmClsMWordCount.getOrDefault(lmaxClass, new HashMap<>());
-				for(Map.Entry<String, Integer> wordCount : mWordCount.entrySet()){
+			if (cls > maxClass) {
+				HashMap<String, Double> newMWordCount = clsWordCount
+						.getValue();
+				HashMap<String, Double> mWordCount = lmClsMWordCount
+						.getOrDefault(lmaxClass, new HashMap<>());
+				for (Map.Entry<String, Double> wordCount : mWordCount
+						.entrySet()) {
 					String word = wordCount.getKey();
-					Integer count = wordCount.getValue();
-					if(newMWordCount.containsKey(word)){
+					Double count = wordCount.getValue();
+					if (newMWordCount.containsKey(word)) {
 						mWordCount.put(word, count + newMWordCount.get(word));
 					}
 				}
-				for(Map.Entry<String, Integer> wordCount : newMWordCount.entrySet()){
+				for (Map.Entry<String, Double> wordCount : newMWordCount
+						.entrySet()) {
 					String word = wordCount.getKey();
-					Integer count = wordCount.getValue();
-					if(!mWordCount.containsKey(word)){
+					Double count = wordCount.getValue();
+					if (!mWordCount.containsKey(word)) {
 						mWordCount.put(word, count);
 					}
 				}
 				lmClsMWordCount.put(lmaxClass, mWordCount);
-			}else{
+			} else {
 				lmClsMWordCount.put(cls, clsWordCount.getValue());
 			}
-			
+
 		}
 
 		// 合并小类计数
-		for (HashMap.Entry<Integer, Integer> clsCount : mClsCount.entrySet()) {
+		for (HashMap.Entry<Integer, Double> clsCount : mClsCount.entrySet()) {
 			Integer cls = clsCount.getKey();
-			if(cls > maxClass){
-				Integer oldCount = lmClsCount.getOrDefault(lmaxClass, 0);
+			if (cls > maxClass) {
+				Double oldCount = lmClsCount.getOrDefault(lmaxClass, 0.0);
 				lmClsCount.put(lmaxClass, clsCount.getValue() + oldCount);
 			} else {
 				lmClsCount.put(cls, clsCount.getValue());
@@ -433,20 +438,20 @@ public class LearnMain {
 					hasNext = true;
 					pwo.print(line + "\n");
 				} else {
-					pw.print(uid+"\t"+ mid + "\t" + targetClass + "\n");
+					pw.print(uid + "\t" + mid + "\t" + targetClass + "\n");
 				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			RawIO.closeWriter(pwo);
-			RawIO.closeWriter(pw);
-			RawIO.closeReader(br);
+			RawIO.close(pwo);
+			RawIO.close(pw);
+			RawIO.close(br);
 		}
-		return hasNext; 
+		return hasNext;
 	}
 
-	public void combine(){
-		
+	public void combine() {
+
 	}
 }

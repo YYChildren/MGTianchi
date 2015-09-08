@@ -1,25 +1,25 @@
-package com.mingchao.ycj.mining;
+package com.mingchao.ycj.mining2;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
-public class Learn {
+public class NativeBayes {
 	private HashMap<Integer, HashMap<String, Double>> mClsMUidCount;
 	private HashMap<Integer, HashMap<String, Double>> mClsMWordCount;
 	private HashMap<Integer, Double> mClsCount;
-	private int nRecords;
+	private Double nRecords;
 
-	public Learn() {
-		super();
-	}
-
-	public Learn(HashMap<Integer, HashMap<String, Double>> mClsMUidCount,
+	public NativeBayes(HashMap<Integer, HashMap<String, Double>> mClsMUidCount,
 			HashMap<Integer, HashMap<String, Double>> mClsMWordCount,
-			HashMap<Integer, Double> mClsCount, int nRecords) {
+			HashMap<Integer, Double> mClsCount) {
 		super();
 		this.mClsMUidCount = mClsMUidCount;
 		this.mClsMWordCount = mClsMWordCount;
 		this.mClsCount = mClsCount;
-		this.nRecords = nRecords;
+		nRecords = 0.0;
+		for (Iterator<Double> iterator = mClsCount.values().iterator(); iterator.hasNext();) {
+			nRecords += iterator.next();
+		}
 	}
 
 	public int pred(String uid, String[] wordArray) {
@@ -68,23 +68,5 @@ public class Learn {
 		} else {
 			return 0.0;
 		}
-	}
-
-	public void setmClsMUidCount(
-			HashMap<Integer, HashMap<String, Double>> mClsMUidCount) {
-		this.mClsMUidCount = mClsMUidCount;
-	}
-
-	public void setmClsMWordCount(
-			HashMap<Integer, HashMap<String, Double>> mClsMWordCount) {
-		this.mClsMWordCount = mClsMWordCount;
-	}
-
-	public void setmClsCount(HashMap<Integer, Double> mClsCount) {
-		this.mClsCount = mClsCount;
-	}
-
-	public void setnRecords(int nRecords) {
-		this.nRecords = nRecords;
 	}
 }

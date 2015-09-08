@@ -1,3 +1,4 @@
+package test;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,6 +31,8 @@ public class TestString {
 		System.out.println(Math.log(1/Double.MAX_VALUE));
 		
 		System.out.println(Math.log(0.000001));
+		
+		System.out.println(Math.exp(1));
 	}
 	@Test
 	public void testDouble(){
