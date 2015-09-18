@@ -28,8 +28,10 @@ public class Init {
 	}
 	
 	public static void main(String[] args) {
-		initTrainSrc("db_pred.t_weibo_train_stn_class", basePath+ "/train_class.tsv");
-		initPredSrc("db_pred.t_weibo_pred_stn", basePath + "/pred_src.tsv");
+		initTrainSrc("db_pred_new.t_weibo_train_stn_class", basePath+ "/train_class.tsv");
+		initTrainCount("db_pred_new.t_weibo_train_stn_class", basePath + "/train_class_N.tsv");
+		initPredSrc("db_pred_new.t_weibo_pred_stn", basePath + "/pred_src.tsv");
+		initTrainCount("db_pred_new.t_weibo_pred_stn", basePath + "/pred_src_N.tsv");
 	}
 	
 	public static String getBasePath(){

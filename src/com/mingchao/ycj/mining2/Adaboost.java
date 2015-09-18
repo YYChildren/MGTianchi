@@ -15,12 +15,13 @@ import com.mingchao.ycj.util.RawIO;
 
 public class Adaboost {
 	public static void main(String[] args) {
-		Adaboost ada = new Adaboost();
+		Adaboost ada = new Adaboost(10);
 		ada.start(Init.getBasePath());
 	}
 
 	private String dataSrcPath = null;
 	private int N;
+	private int nModels;
 
 	private Double a;
 	private ArrayList<Double> D = null;
@@ -37,9 +38,22 @@ public class Adaboost {
 	private HashMap<Integer, HashMap<String, Double>> mLClsMUidCount = null;
 	private HashMap<Integer, HashMap<String, Double>> mLClsMWordCount = null;
 
-	public final int[] forwardSplClass = { 0, 1, 22, 208, 1102, 2292, 73450 };
-	public final int[] commentSplClass = { 0, 1, 9, 37, 305, 1326, 29516 };
-	public final int[] likeSplClass = { 0, 1, 9, 81, 1326, 2294, 6861 };
+	//old
+//	public static final int[] forwardSplClass = { 0, 1, 22, 208, 1102, 2292, 73450 };
+//	public static final int[] commentSplClass = { 0, 1, 9, 37, 305, 1326, 29516 };
+//	public static final int[] likeSplClass = { 0, 1, 9, 81, 1326, 2294, 6861 };
+
+//	public static final int[] forwardSplClass = { 0, 1, 35, 251, 3304, 35418};
+//	public static final int[] commentSplClass = { 0, 1, 12, 55, 367, 1592,6861};
+//	public static final int[] likeSplClass = { 0, 1, 12, 98, 1592, 11859 };
+	
+	public static final int[] forwardSplClass = { 0, 1, 7,35,117,251,1590,3304,35418};
+	public static final int[] commentSplClass = { 0, 1, 5,15,30,81,210,637,1326,6861};
+	public static final int[] likeSplClass = { 0, 1, 5,15,45,119,305,1592,11859};
+	
+	public Adaboost(int nModels){
+		this.nModels = nModels;
+	}
 
 	public void start(String basePath) {
 		try {
@@ -50,7 +64,7 @@ public class Adaboost {
 			System.out.println("Adaboost initting");
 			init(inPath, inNPath);
 			System.out.println("Adaboost initted");
-			for (int i = 0; i < 10; i++) {
+			for (int i = 0; i < nModels; i++) {
 				modelPath = basePath + "/bayes_" + i + ".mod";
 				System.out.println("Updating model");
 				updateModel(modelPath);
@@ -182,7 +196,9 @@ public class Adaboost {
 
 		Double m = 0.0;
 		Double f = 0.0;
-		ArrayList<Integer> wRate = new ArrayList<Integer>(N);
+		//Double rm = 0.0;
+		//Double rf = 0.0;
+		//ArrayList<Integer> wRate = new ArrayList<Integer>(N);
 		int i = 0;
 		String line = null;
 		while((line = br.readLine()) != null){
@@ -207,20 +223,25 @@ public class Adaboost {
 					/ (sourceLike + 3);
 			Double precisioni = 1 - 0.5 * def - 0.25 * dec - 0.25 * del;
 			Double sgn = sgn(precisioni - 0.8);
+			Double wi =  D.get(i); 
 			m += counti1 * sgn;
+			//rm += wi*counti1 * sgn;
 			f += counti1;
+			//rf += wi*counti1;
 			if (sgn == 0.0) {
-				D.set(i, -D.get(i++));// 错误分类
+				D.set(i, -wi);// 错误分类
 			}
-			wRate.add(counti1);//
+			//wRate.add(counti1);//
+			++i;
 		}
 		RawIO.close(br);
 
 		Double precision = m / f;
+		//Double rprecision = rm / rf;
 		System.out.println("Current correct rate: " + precision);
+		//System.out.println("Current correct rate with D: " + rprecision);
 
-		Double e = 1 - precision;
-
+		Double e = 1-precision;
 		a = (1.0 / 2) * Math.log((1 - e) / e);
 		// save
 
@@ -230,10 +251,15 @@ public class Adaboost {
 		int dz = D.size();
 		for (int j = 0; j < dz; j++) {
 			Double wj = D.get(j);
+			//1: wj = wj * Math.exp(-a0) -- wj = -wj * Math.exp(a0 + Math.log(Math.log(wRate.get(j)) + 1));  No rate           36.7
+			//2: wj = wj * Math.exp(-a0) -- wj = -wj * Math.exp(a0)                                                                                  36.9
+			//3: wj = wj * Math.exp(-a0)  * wRate.get(j); -- wj = -wj * Math.exp(a0) * wRate.get(j);
+			//4: wj = wj * Math.exp(-a0)  * Math.log(wRate.get(j) + 1);  --  wj = -wj * Math.exp(a0) * Math.log(wRate.get(j) +1);
 			if (wj > 0.0) {
 				wj = wj * Math.exp(-a0);// 正确分类
 			} else {
-				wj = -wj * Math.exp(a0 + Math.log(Math.log(wRate.get(j)) + 1));// 错误分类
+				wj = -wj * Math.exp(a0);// 错误分类 
+				//wj = -wj * Math.exp(a0 + Math.log(Math.log(wRate.get(j)) + 1));// 错误分类
 			}
 			z += wj;
 			D.set(j, wj);

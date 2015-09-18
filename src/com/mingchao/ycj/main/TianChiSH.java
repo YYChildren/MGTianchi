@@ -1,13 +1,9 @@
 package com.mingchao.ycj.main;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 
+import com.mingchao.ycj.util.RawIO;
 import com.mingchao.ycj.util.SHFactory;
 import com.mingchao.ycj.util.SentenceHandler;
 
@@ -25,7 +21,7 @@ public class TianChiSH {
 			String content = a[a.length - 1];
 			SentenceHandler sh = shf.buildHandler();
 			sh.analyze(content);
-			pw.print(content);
+			pw.print(line);
 			pw.print('\t');
 			pw.print(sh.getSegs());
 			pw.print('\t');
@@ -33,40 +29,33 @@ public class TianChiSH {
 			pw.print('\t');
 			pw.print(sh.getNers());
 			pw.print('\n');
-
 		}
-
 	}
+
 	public static void main(String[] args) {
-		String transFileIn = "G:/tianchi/weibo_train_data.tsv";
-		String predFileIn = "G:/tianchi/weibo_predict_data.tsv";
-		String transFileOut = "G:/tianchi/weibo_train_out.tsv";
-		String predFileOut = "G:/tianchi/weibo_predict_out.tsv";
+		String transFileIn = "E:/WeiboPred/in/weibo_train_data.tsv";
+		String predFileIn = "E:/WeiboPred/in/weibo_predict_data.tsv";
+		String transFileOut = "E:/WeiboPred/in/weibo_train_out.tsv";
+		String predFileOut = "E:/WeiboPred/in/weibo_predict_out.tsv";
 		String cwsModel = "E:/Children/data/3.2.0/ltp_data/cws.model";
 		String posModel = "E:/Children/data/3.2.0/ltp_data/pos.model";
 		String nerModel = "E:/Children/data/3.2.0/ltp_data/ner.model";
 		SHFactory shf = SHFactory.getInstance(cwsModel, posModel, nerModel);
 		try {
-			BufferedReader transBR = new BufferedReader(new FileReader(transFileIn));
-			BufferedReader predBR = new BufferedReader(new FileReader(predFileIn));
-			PrintWriter transPW = new PrintWriter(new BufferedWriter(new FileWriter(transFileOut)));
-			PrintWriter predPW = new PrintWriter(new BufferedWriter(new FileWriter(predFileOut)));
-			startSh(transBR,transPW,shf);
-			transBR.close();
-			transPW.close();
-			startSh(predBR,predPW,shf);
-			predBR.close();
-			predPW.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			BufferedReader transBR = RawIO.openReader(transFileIn);
+			BufferedReader predBR = RawIO.openReader(predFileIn);
+			PrintWriter transPW = RawIO.openWriter(transFileOut);
+			PrintWriter predPW = RawIO.openWriter(predFileOut);
+			startSh(transBR, transPW, shf);
+			RawIO.close(transBR);
+			RawIO.close(transPW);
+			startSh(predBR, predPW, shf);
+			RawIO.close(predBR);
+			RawIO.close(predPW);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 	}
-	
+
 }

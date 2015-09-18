@@ -1,7 +1,5 @@
 package test;
 
-import static org.junit.Assert.*;
-
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;

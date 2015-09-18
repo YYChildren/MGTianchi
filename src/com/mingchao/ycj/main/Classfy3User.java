@@ -1,13 +1,10 @@
 package com.mingchao.ycj.main;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Set;
 
+import com.mingchao.ycj.util.RawIO;
 import com.mingchao.ycj.util.Tool;
 
 public class Classfy3User {
@@ -26,8 +23,8 @@ public class Classfy3User {
 		PrintWriter pw = null;
 		String line = null;
 		try {
-			 br = new BufferedReader(new FileReader(in));
-			 pw = new PrintWriter(new BufferedWriter(new FileWriter(out)));
+			 br = RawIO.openReader(in);
+			 pw = RawIO.openWriter(out);
 			while((line=br.readLine()) != null){
 				line = line.trim();
 				if(!line.equals("") && s.contains( line.split("\t")[0]) ){
@@ -38,12 +35,8 @@ public class Classfy3User {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}finally{
-			try {
-				br.close();
-				pw.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			RawIO.close(br);
+			RawIO.close(pw);
 		}
 	}
 

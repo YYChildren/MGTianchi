@@ -1,13 +1,12 @@
 package com.mingchao.ycj.main;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+
+import com.mingchao.ycj.util.RawIO;
 
 public class AddClassTail {
 	public static void main(String[] args) {
@@ -16,8 +15,8 @@ public class AddClassTail {
 		
 		@SuppressWarnings("unchecked")
 		ArrayList<Integer> likeClassList = (ArrayList<Integer>) commentClassList.clone();
-		String trainOut = "E:/WeiboPred/out/weibo_train_out.tsv";
-		String trainOutClass = "E:/WeiboPred/out/weibo_train_out_class.tsv";
+		String trainOut = "E:/WeiboPred/out/weibo_train_stn.tsv";
+		String trainOutClass = "E:/WeiboPred/out/weibo_train_stn_class.tsv";
 		addClass(forwardClassList,commentClassList,likeClassList,trainOut,trainOutClass);
 		
 	}
@@ -34,8 +33,8 @@ public class AddClassTail {
 		String line = null;
 		String []  count= null;
 		try {
-			br = new BufferedReader(new FileReader(trainOut));
-			pw = new PrintWriter(new BufferedWriter(new FileWriter(trainOutClass)));
+			br = RawIO.openReader(trainOut);
+			pw = RawIO.openWriter(trainOutClass);
 			while((line=br.readLine()) != null){
 				line = line.trim();
 				if(!line.equals("")){
@@ -61,16 +60,8 @@ public class AddClassTail {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}finally{
-			try {
-				br.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			try {
-				pw.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			RawIO.close(br);
+			RawIO.close(pw);
 		}
 	}
 	
@@ -100,7 +91,7 @@ public class AddClassTail {
     	ArrayList<Integer> s = null;
 		String line = null;
 		try {
-			 br = new BufferedReader(new FileReader(filename));
+			 br = RawIO.openReader(filename);
 			s = new ArrayList<Integer>();
 			while((line=br.readLine()) != null){
 				line = line.trim();
@@ -113,11 +104,7 @@ public class AddClassTail {
 			e.printStackTrace();
 			return null;
 		}finally{
-			try {
-				br.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			RawIO.close(br);
 		}
     }
 }
